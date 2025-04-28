@@ -22,19 +22,19 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'  # Set the Node.js version here
+        node-version: '14'
 
-    # Step 3: Clean npm cache
+    # Step 3: Clean npm cache to avoid potential issues
     - name: Clean npm cache
-      run: npm cache clean --force  # Clean the npm cache to avoid any issues
+      run: npm cache clean --force  # Clear npm cache
 
-    # Step 4: Update npm to latest stable version
+    # Step 4: Update npm to the latest stable version
     - name: Update npm to latest stable version
-      run: npm install -g npm@latest  # Update npm to the latest stable version
+      run: npm install -g npm@latest  # Install latest npm
 
     # Step 5: List files for debugging (Optional step to check the directory structure)
     - name: List files for debugging
-      run: ls -la /home/runner/work/MCP-Repo/MCP-Repo  # Correct path for your repository
+      run: ls -la /home/runner/work/MCP-Repo/MCP-Repo
 
     # Step 6: Install dependencies using npm ci
     - name: Install dependencies
