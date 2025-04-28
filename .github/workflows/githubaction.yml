@@ -26,7 +26,7 @@ jobs:
 
     # Step 3: List files for debugging (Optional step to check the directory structure)
     - name: List files for debugging
-      run: ls -la /home/runner/work/MCP-Repo/MCP-Repo  # Correct the path here
+      run: ls -la /home/runner/work/MCP-Repo  # Correct the path here
 
     # Step 4: Install dependencies using npm ci
     - name: Install dependencies
