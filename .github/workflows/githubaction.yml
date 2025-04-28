@@ -45,9 +45,10 @@ jobs:
       run: npm install --legacy-peer-deps
       # Replaced npm ci with npm install to avoid issues with ansi-regex dependency
 
-    # Step 7: Install Playwright Browsers
+    # Step 7: Install Playwright Browsers using npx
     - name: Install Playwright Browsers
-      run: npm run install:browsers
+      run: npx playwright install
+      # Using npx to avoid permission issues
 
     # Step 8: Run MCP tests
     - name: Run MCP Tests
