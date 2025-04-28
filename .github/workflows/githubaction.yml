@@ -22,23 +22,31 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
+        node-version: '14'  # Set the Node.js version here
 
-    # Step 3: List files for debugging (Optional step to check the directory structure)
+    # Step 3: Clean npm cache
+    - name: Clean npm cache
+      run: npm cache clean --force  # Clean the npm cache to avoid any issues
+
+    # Step 4: Update npm to latest stable version
+    - name: Update npm to latest stable version
+      run: npm install -g npm@latest  # Update npm to the latest stable version
+
+    # Step 5: List files for debugging (Optional step to check the directory structure)
     - name: List files for debugging
-      run: ls -la /home/runner/work/MCP-Repo/MCP-Repo  # Corrected the path here
+      run: ls -la /home/runner/work/MCP-Repo/MCP-Repo  # Correct path for your repository
 
-    # Step 4: Install dependencies using npm ci
+    # Step 6: Install dependencies using npm ci
     - name: Install dependencies
-      run: npm ci
+      run: npm ci  # Install dependencies from package-lock.json
 
-    # Step 5: Install Playwright Browsers
+    # Step 7: Install Playwright Browsers
     - name: Install Playwright Browsers
-      run: npm run install:browsers
+      run: npm run install:browsers  # Install necessary browsers for Playwright
 
-    # Step 6: Run MCP tests
+    # Step 8: Run MCP tests
     - name: Run MCP Tests
-      run: npm run test:mcp
+      run: npm run test:mcp  # Run the MCP tests using your custom script
 
     # Optional: Add success message after tests
     - name: Send success message
