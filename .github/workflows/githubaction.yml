@@ -8,6 +8,8 @@ on:
         default: 'World'
         required: true
         type: string
+  push:
+    branches: [ main, master ]
 
 jobs:
   ci_cd_workflow:
