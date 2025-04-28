@@ -36,36 +36,34 @@ jobs:
       run: npm install -g npm@8.19.4
       # Using npm 8.19.4 which is compatible with Node 16
 
-    # Step 5: List files for debugging (Optional step to check the directory structure)
-    - name: List files for debugging
-      run: ls -la
-
-    # Step 6: Install dependencies using npm install with legacy-peer-deps flag
+    # Step 5: Install dependencies using npm install with legacy-peer-deps flag
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       # Replaced npm ci with npm install to avoid issues with ansi-regex dependency
 
-    # Step 7: Install Playwright using the current Microsoft action
+    # Step 6: Setup Playwright using the official action
+    - uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+    - run: npm ci
     - name: Install Playwright
-      uses: microsoft/playwright-github-action@v1.5.4
-    
-    # Step 8: Install only Chromium
-    - name: Install only Chromium browser
       run: |
-        echo "Installing only Chromium browser"
-        if [ -f "/usr/local/bin/playwright" ]; then
-          /usr/local/bin/playwright install chromium
-        elif [ -f "$HOME/.local/share/playwright/playwright.sh" ]; then
-          $HOME/.local/share/playwright/playwright.sh install chromium
-        else
-          echo "Trying with npx from the node_modules directory"
-          chmod +x ./node_modules/.bin/playwright
-          ./node_modules/.bin/playwright install chromium
-        fi
+        npm install playwright
+        npm install -g @playwright/test
+        
+    # Step 7: Install Chrome (skip Playwright browser installation)
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        google-chrome --version
 
-    # Step 9: Run MCP tests
+    # Step 8: Run MCP tests
     - name: Run MCP Tests
       run: npm run test:mcp
+      env:
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+        PWDEBUG: 1
 
     # Optional: Add success message after tests
     - name: Send success message
