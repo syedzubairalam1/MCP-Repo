@@ -1,0 +1,24 @@
+{
+  "cucumber.features": [
+    "features/**/*.feature"
+  ],
+  "cucumber.glue": [
+    "tests/step_definitions/**/*.js"
+  ],
+  "cucumber.parameterTypes": [
+    "tests/support/**/*.js"
+  ],
+  "cucumberautocomplete.steps": [
+    "tests/step_definitions/**/*.js"
+  ],
+  "cucumberautocomplete.syncfeatures": true,
+  "cucumberautocomplete.strictGherkinCompletion": false,
+  "cucumberautocomplete.strictGherkinValidation": false,
+  "cucumberautocomplete.smartSnippets": true,
+  "cucumberautocomplete.stepsInvariants": true,
+  "editor.quickSuggestions": {
+    "comments": false,
+    "strings": true,
+    "other": true
+  }
+} 
