@@ -45,14 +45,16 @@ jobs:
       run: npm install --legacy-peer-deps
       # Replaced npm ci with npm install to avoid issues with ansi-regex dependency
 
-    # Step 7: Install Playwright using the official GitHub Action
-    - name: Setup Playwright
-      uses: microsoft/playwright-github-action@v1
+    # Step 7: Install system dependencies required by Playwright
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgbm-dev libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2 libpango-1.0-0 libpangocairo-1.0-0 libnspr4 libnss3
 
-    # Step 8: Install Playwright Browsers
+    # Step 8: Install Playwright Browsers with system dependencies
     - name: Install Playwright Browsers
-      run: sudo npx playwright install --with-deps
-      # Using sudo to avoid permission issues
+      run: PLAYWRIGHT_BROWSERS_PATH=0 npx playwright install chromium
+      # Installing only Chromium to reduce installation size and time
 
     # Step 9: Run MCP tests
     - name: Run MCP Tests
