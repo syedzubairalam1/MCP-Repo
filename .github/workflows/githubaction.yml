@@ -58,13 +58,40 @@ jobs:
         sudo apt-get install -y google-chrome-stable
         google-chrome --version
 
-    # Step 8: Run MCP tests
+    # Step 8: Run MCP tests with report generation
     - name: Run MCP Tests
-      run: npm run test:mcp
+      run: npm run test:login:report
       env:
         PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
         PWDEBUG: 1
+      
+    # Step 9: Upload test reports as artifacts
+    - name: Upload Cucumber HTML Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: cucumber-report
+        path: |
+          cucumber-report.html
+          cucumber-report.json
+          reports/
+        retention-days: 30
 
+    # Step 10: Publish test results to GitHub
+    - name: Publish Test Results
+      if: always()
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        files: |
+          reports/*.xml
+          reports/**/*.xml
+          
     # Optional: Add success message after tests
     - name: Send success message
+      if: success()
       run: echo "CI/CD workflow executed successfully! Hello ${{ inputs.name }}"
+      
+    # Notify on failure
+    - name: Send failure message
+      if: failure()
+      run: echo "Tests failed! Check the test report for details."
