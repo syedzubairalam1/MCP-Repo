@@ -31,9 +31,10 @@ jobs:
     - name: Clean npm cache
       run: npm cache clean --force
 
-    # Step 4: Update npm to the latest stable version
-    - name: Update npm to latest stable version
-      run: npm install -g npm@latest
+    # Step 4: Update npm to a version compatible with Node 16
+    - name: Update npm to compatible version
+      run: npm install -g npm@8.19.4
+      # Using npm 8.19.4 which is compatible with Node 16
 
     # Step 5: List files for debugging (Optional step to check the directory structure)
     - name: List files for debugging
