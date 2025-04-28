@@ -40,20 +40,30 @@ jobs:
     - name: List files for debugging
       run: ls -la
 
-    # Step 6: Install dependencies using npm ci with legacy-peer-deps flag
+    # Step 6: Install dependencies using npm install with legacy-peer-deps flag
     - name: Install dependencies
       run: npm install --legacy-peer-deps
       # Replaced npm ci with npm install to avoid issues with ansi-regex dependency
 
-    # Step 7: Install Playwright and browsers using the official action
-    - name: Set up Playwright
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - run: npm install -D @playwright/test
-    - run: npx playwright install --with-deps chromium
+    # Step 7: Install Playwright using the current Microsoft action
+    - name: Install Playwright
+      uses: microsoft/playwright-github-action@v1.5.4
+    
+    # Step 8: Install only Chromium
+    - name: Install only Chromium browser
+      run: |
+        echo "Installing only Chromium browser"
+        if [ -f "/usr/local/bin/playwright" ]; then
+          /usr/local/bin/playwright install chromium
+        elif [ -f "$HOME/.local/share/playwright/playwright.sh" ]; then
+          $HOME/.local/share/playwright/playwright.sh install chromium
+        else
+          echo "Trying with npx from the node_modules directory"
+          chmod +x ./node_modules/.bin/playwright
+          ./node_modules/.bin/playwright install chromium
+        fi
 
-    # Step 8: Run MCP tests
+    # Step 9: Run MCP tests
     - name: Run MCP Tests
       run: npm run test:mcp
 
