@@ -45,12 +45,16 @@ jobs:
       run: npm install --legacy-peer-deps
       # Replaced npm ci with npm install to avoid issues with ansi-regex dependency
 
-    # Step 7: Install Playwright Browsers using npx
-    - name: Install Playwright Browsers
-      run: npx playwright install
-      # Using npx to avoid permission issues
+    # Step 7: Install Playwright using the official GitHub Action
+    - name: Setup Playwright
+      uses: microsoft/playwright-github-action@v1
 
-    # Step 8: Run MCP tests
+    # Step 8: Install Playwright Browsers
+    - name: Install Playwright Browsers
+      run: sudo npx playwright install --with-deps
+      # Using sudo to avoid permission issues
+
+    # Step 9: Run MCP tests
     - name: Run MCP Tests
       run: npm run test:mcp
 
