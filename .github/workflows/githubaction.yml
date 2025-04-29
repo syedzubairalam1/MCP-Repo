@@ -1,60 +1,11 @@
-name: githubactions
+stages:
+  - test
 
-on:
-  workflow_dispatch:
-    inputs:
-      name:
-        description: 'Person to greet'
-        default: 'World'
-        required: true
-        type: string
-  push:
-    branches: [main, master]
-
-jobs:
-  ci_cd_workflow:
-    runs-on: ubuntu-latest
-
-    steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    # Step 2: Set up Node.js environment
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-
-    # Step 3: Install dependencies
-    - name: Install dependencies
-      run: npm install --legacy-peer-deps
-
-    # Step 4: Install Playwright and necessary browsers
-    - name: Install Playwright
-      run: |
-        npm install playwright
-        npx playwright install
-
-    # Step 5: Run Playwright tests and generate report
-    - name: Run Playwright Tests
-      run: |
-        npx playwright test --reporter=html --output=playwright-report
-      env:
-        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
-
-    # Step 6: Upload the test report as an artifact
-    - name: Upload Playwright Report
-      uses: actions/upload-artifact@v3
-      with:
-        name: playwright-report
-        path: playwright-report
-
-    # Optional: Success or failure message
-    - name: Notify on success
-      if: success()
-      run: echo "Tests passed successfully! Hello ${{ inputs.name }}"
-
-    - name: Notify on failure
-      if: failure()
-      run: echo "Tests failed! Please check the report for details."
+e2e_mcp:
+  image: mcr.microsoft.com/playwright:latest
+  stage: test
+  script:
+    - npm ci
+    - npx playwright install --with-deps        # install browsers
+    - npx playwright launch --server --port 9222 --headless &  # start MCP server :contentReference[oaicite:1]{index=1}
+    - npx mcp run --feature features/login.feature --endpoint ws://localhost:9222
