@@ -1,4 +1,4 @@
-name: Manual workflow
+name: githubactions
 
 on:
   workflow_dispatch:
@@ -16,94 +16,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository to ensure package.json is available
+    # Step 1: Checkout the repository
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        # Always fetch the latest commit from the repository
-        fetch-depth: 0
 
-    # Step 2: Set up Node.js environment with version 16
+    # Step 2: Set up Node.js environment
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '16'
-        cache: 'npm'
 
-    # Step 3: Clean npm cache to avoid potential issues
-    - name: Clean npm cache
-      run: npm cache clean --force
-
-    # Step 4: Update npm to a version compatible with Node 16 (8.19.4)
-    - name: Update npm to compatible version
-      run: npm install -g npm@8.19.4
-
-    # Step 5: Install dependencies using npm install with legacy-peer-deps flag
+    # Step 3: Install dependencies
     - name: Install dependencies
       run: npm install --legacy-peer-deps
 
-    # Step 6: Install Playwright using the official Playwright action
+    # Step 4: Install Playwright and necessary browsers
     - name: Install Playwright
       run: |
         npm install playwright
-        npm install -g @playwright/test
         npx playwright install
 
-    # Step 7: Install Google Chrome (required for Playwright tests)
-    - name: Install Chrome
+    # Step 5: Run Playwright tests and generate report
+    - name: Run Playwright Tests
       run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
-        google-chrome --version
-
-    # Step 8: Install Playwright MCP Server
-    - name: Install Playwright MCP Server
-      run: npm install -g @executeautomation/playwright-mcp-server
-
-    # Step 9: Run tests with MCP Server and generate the report
-    - name: Run MCP Tests with Report Generation
-      run: |
-        npx @executeautomation/playwright-mcp-server -- npm run test
-        npm run report
+        npx playwright test --reporter=html --output=playwright-report
       env:
         PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
-        PWDEBUG: 1
 
-    # Step 10: Upload test reports as artifacts (Cucumber HTML Report)
-    - name: Upload Cucumber HTML Report
+    # Step 6: Upload the test report as an artifact
+    - name: Upload Playwright Report
       uses: actions/upload-artifact@v3
-      if: always()
       with:
-        name: cucumber-report
-        path: |
-          cucumber-report.html
-          cucumber-report.json
-          reports/
-        retention-days: 30
+        name: playwright-report
+        path: playwright-report
 
-    # Step 11: Publish test results to GitHub in XML format
-    - name: Publish Test Results
-      if: always()
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      with:
-        files: |
-          reports/*.xml
-          reports/**/*.xml
-
-    # Optional: Send success message after tests
-    - name: Send success message
+    # Optional: Success or failure message
+    - name: Notify on success
       if: success()
-      run: echo "CI/CD workflow executed successfully! Hello ${{ inputs.name }}"
+      run: echo "Tests passed successfully! Hello ${{ inputs.name }}"
 
-    # Optional: Notify on failure
-    - name: Send failure message
+    - name: Notify on failure
       if: failure()
-      run: echo "Tests failed! Check the test report for details."
-
-    # Enable debugging for GitHub Actions (to get more verbose logs)
-    - name: Enable Debugging
-      run: |
-        echo "Enabling debugging"
-      env:
-        ACTIONS_RUNNER_DEBUG: true
-        ACTIONS_STEP_DEBUG: true
+      run: echo "Tests failed! Please check the report for details."
