@@ -1,5 +1,9 @@
+<<<<<<< Updated upstream
 stages:
   - test
+=======
+name: githubactionss
+>>>>>>> Stashed changes
 
 e2e_mcp:
   image: mcr.microsoft.com/playwright:latest
