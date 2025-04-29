@@ -19,6 +19,9 @@ jobs:
     # Step 1: Checkout the repository to ensure package.json is available
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        # Always fetch the latest commit from the repository
+        fetch-depth: 0
 
     # Step 2: Set up Node.js environment with version 16
     - name: Set up Node.js
@@ -96,3 +99,11 @@ jobs:
     - name: Send failure message
       if: failure()
       run: echo "Tests failed! Check the test report for details."
+
+    # Enable debugging for GitHub Actions (to get more verbose logs)
+    - name: Enable Debugging
+      run: |
+        echo "Enabling debugging"
+      env:
+        ACTIONS_RUNNER_DEBUG: true
+        ACTIONS_STEP_DEBUG: true
