@@ -9,7 +9,7 @@ on:
         required: true
         type: string
   push:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   ci_cd_workflow:
@@ -20,7 +20,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Step 2: Set up Node.js environment
+    # Step 2: Set up Node.js environment with version 16
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
@@ -31,41 +31,42 @@ jobs:
     - name: Clean npm cache
       run: npm cache clean --force
 
-    # Step 4: Update npm to a version compatible with Node 16
+    # Step 4: Update npm to a version compatible with Node 16 (8.19.4)
     - name: Update npm to compatible version
       run: npm install -g npm@8.19.4
-      # Using npm 8.19.4 which is compatible with Node 16
 
     # Step 5: Install dependencies using npm install with legacy-peer-deps flag
     - name: Install dependencies
       run: npm install --legacy-peer-deps
-      # Replaced npm ci with npm install to avoid issues with ansi-regex dependency
 
-    # Step 6: Setup Playwright using the official action
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-    - run: npm ci
+    # Step 6: Install Playwright using the official Playwright action
     - name: Install Playwright
       run: |
         npm install playwright
         npm install -g @playwright/test
-        
-    # Step 7: Install Chrome (skip Playwright browser installation)
+        npx playwright install
+
+    # Step 7: Install Google Chrome (required for Playwright tests)
     - name: Install Chrome
       run: |
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
         google-chrome --version
 
-    # Step 8: Run MCP tests with report generation
-    - name: Run MCP Tests
-      run: npm run test:login:report
+    # Step 8: Install Playwright MCP Server
+    - name: Install Playwright MCP Server
+      run: npm install -g @executeautomation/playwright-mcp-server
+
+    # Step 9: Run tests with MCP Server and generate the report
+    - name: Run MCP Tests with Report Generation
+      run: |
+        npx @executeautomation/playwright-mcp-server -- npm run test
+        npm run report
       env:
-        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 0
         PWDEBUG: 1
-      
-    # Step 9: Upload test reports as artifacts
+
+    # Step 10: Upload test reports as artifacts (Cucumber HTML Report)
     - name: Upload Cucumber HTML Report
       uses: actions/upload-artifact@v3
       if: always()
@@ -77,7 +78,7 @@ jobs:
           reports/
         retention-days: 30
 
-    # Step 10: Publish test results to GitHub
+    # Step 11: Publish test results to GitHub in XML format
     - name: Publish Test Results
       if: always()
       uses: EnricoMi/publish-unit-test-result-action@v2
@@ -85,13 +86,13 @@ jobs:
         files: |
           reports/*.xml
           reports/**/*.xml
-          
-    # Optional: Add success message after tests
+
+    # Optional: Send success message after tests
     - name: Send success message
       if: success()
       run: echo "CI/CD workflow executed successfully! Hello ${{ inputs.name }}"
-      
-    # Notify on failure
+
+    # Optional: Notify on failure
     - name: Send failure message
       if: failure()
       run: echo "Tests failed! Check the test report for details."

@@ -1,0 +1,56 @@
+name: MCP Test Workflow
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 0 * * 1'  # Run weekly on Mondays at midnight
+
+jobs:
+  mcp_test_job:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Install dependencies
+      run: npm install --legacy-peer-deps
+      
+    - name: Install Playwright
+      run: |
+        npx playwright install
+        
+    - name: Install Playwright MCP Server
+      run: npm install -g @executeautomation/playwright-mcp-server
+      
+    - name: Run MCP Tests with Report Generation
+      run: |
+        # Run the MCP server with the test command
+        npx @executeautomation/playwright-mcp-server -- npm run test
+        
+        # Generate the test report
+        npm run report
+      
+    - name: Upload Test Reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: mcp-test-reports
+        path: |
+          reports/
+        retention-days: 14
+        
+    - name: Notify on Success
+      if: success()
+      run: echo "MCP Tests completed successfully!"
+      
+    - name: Notify on Failure
+      if: failure()
+      run: echo "MCP Tests failed! Check the test report for details." 
