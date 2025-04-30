@@ -1,15 +1,35 @@
-<<<<<<< Updated upstream
 stages:
   - test
-=======
-name: githubactionss
->>>>>>> Stashed changes
 
-e2e_mcp:
-  image: mcr.microsoft.com/playwright:latest
+variables:
+  NODE_VERSION: "18"
+  MCP_PORT: "9323"
+
+cache:
+  paths:
+    - node_modules/
+
+before_script:
+  # Use the node image and install dependencies once
+  - apt-get update && apt-get install -y curl
+  - curl -fsSL https://deb.nodesource.com/setup_$NODE_VERSION.x | bash -
+  - npm ci
+  - npx playwright install
+
+mcp-playwright-test:
   stage: test
+  image: node:${NODE_VERSION}
   script:
-    - npm ci
-    - npx playwright install --with-deps        # install browsers
-    - npx playwright launch --server --port 9222 --headless &  # start MCP server :contentReference[oaicite:1]{index=1}
-    - npx mcp run --feature features/login.feature --endpoint ws://localhost:9222
+    # 1. Start MCP Server in headless mode, listening on MCP_PORT
+    - npx @playwright/mcp@latest --headless --port $MCP_PORT &
+    # give MCP a moment to start
+    - sleep 5
+    # 2. Run your Playwright tests; they should be configured to point at http://localhost:$MCP_PORT/sse
+    - npx playwright test
+  artifacts:
+    when: always
+    reports:
+      junit: playwright-report/junit.xml
+    paths:
+      - playwright-report/
+      - test-results/
